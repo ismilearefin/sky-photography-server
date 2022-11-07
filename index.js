@@ -27,7 +27,13 @@ try{
         const result = await cursor.toArray();
         res.send(result)
     })
-
+    // load data for All services page
+    app.get('/allservices', async(req, res)=>{
+        const query ={};
+        const cursor = serviceCollection.find(query)
+        const result = await cursor.toArray();
+        res.send(result)
+    })
 
 
 
