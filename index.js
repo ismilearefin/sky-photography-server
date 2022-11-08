@@ -53,10 +53,29 @@ try{
         const result = await cursor.toArray();
         res.send(result)
     })
+    //load only user comments
+    app.get('/allcomments/user', async(req, res)=>{
+        let query ={};
+        if(req.query.email){
+            query = {
+                email : req.query.email
+            }
+        }
+        const cursor = await commentsCollection.find(query)
+        const result = await cursor.toArray();
+        res.send(result)
+    })
     // store comments in database
     app.post('/allcomments', async(req, res)=>{
         const comments = req.body;
         const result = await commentsCollection.insertOne(comments)
+        res.send(result);
+    });
+    //delete comment
+    app.delete('/allcomments/:id', async(req, res)=>{
+        const id = req.params.id ;
+        const query ={_id : ObjectId(id)}
+        const result = await commentsCollection.deleteOne(query);
         res.send(result);
     })
 
