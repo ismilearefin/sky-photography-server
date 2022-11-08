@@ -19,7 +19,7 @@ async function run (){
 
 try{
     const serviceCollection = client.db("skyPhotography").collection("events");
-
+    const commentsCollection = client.db("allComments").collection("comments");
     // load data for service section 
     app.get('/service', async(req, res) =>{
         const query = {};
@@ -41,7 +41,19 @@ try{
         const result = await serviceCollection.findOne(query)
         res.send(result);
     })
-
+    //load all comments
+    app.get('/allcomments', async(req, res)=>{
+        const query ={};
+        const cursor = commentsCollection.find(query)
+        const result = await cursor.toArray();
+        res.send(result)
+    })
+    // store comments in database
+    app.post('/allcomments', async(req, res)=>{
+        const comments = req.body;
+        const result = await commentsCollection.insertOne(comments)
+        res.send(result);
+    })
 
 
 }
