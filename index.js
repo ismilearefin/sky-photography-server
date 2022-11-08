@@ -41,9 +41,14 @@ try{
         const result = await serviceCollection.findOne(query)
         res.send(result);
     })
-    //load all comments
+    //load all comments & query (service name)
     app.get('/allcomments', async(req, res)=>{
-        const query ={};
+        let query ={};
+        if(req.query.service){
+            query = {
+                service : req.query.service
+            }
+        }
         const cursor = commentsCollection.find(query)
         const result = await cursor.toArray();
         res.send(result)
