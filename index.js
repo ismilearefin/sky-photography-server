@@ -70,7 +70,7 @@ try{
                 service : req.query.service
             }
         }
-        const cursor = commentsCollection.find(query)
+        const cursor = commentsCollection.find(query).sort({DateTime:-1})
         const result = await cursor.toArray();
         res.send(result)
     })
@@ -108,7 +108,7 @@ try{
     // store comments in database
     app.post('/allcomments', async(req, res)=>{
         const comments = req.body;
-        const result = await commentsCollection.insertOne(comments)
+        const result = await commentsCollection.insertOne({...comments,"DateTime": new Date()})
         res.send(result);
     });
     // add new service in database
