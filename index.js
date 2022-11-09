@@ -23,14 +23,15 @@ try{
     // load data for service section 
     app.get('/service', async(req, res) =>{
         const query = {};
-        const cursor = serviceCollection.find(query).limit(3);
+        const cursor = serviceCollection.find(query).sort({ _id : -1})
+        .limit(3);
         const result = await cursor.toArray();
         res.send(result)
     })
     // load data for All services page
     app.get('/allservices', async(req, res)=>{
         const query ={};
-        const cursor = serviceCollection.find(query)
+        const cursor = serviceCollection.find(query).sort({ _id : -1})
         const result = await cursor.toArray();
         res.send(result)
     })
@@ -65,12 +66,25 @@ try{
         const result = await cursor.toArray();
         res.send(result)
     })
+
+
+
+
+
     // store comments in database
     app.post('/allcomments', async(req, res)=>{
         const comments = req.body;
         const result = await commentsCollection.insertOne(comments)
         res.send(result);
     });
+    // add new service in database
+    app.post('/allservices', async(req, res)=>{
+        const addServices = req.body;
+        const result = await serviceCollection.insertOne(addServices)
+        res.send(result)
+    })
+
+
     //delete comment
     app.delete('/allcomments/:id', async(req, res)=>{
         const id = req.params.id ;
