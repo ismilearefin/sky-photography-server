@@ -86,9 +86,16 @@ try{
                 email : req.query.email
             }
         }
-        const cursor = await commentsCollection.find(query)
+        const cursor =  commentsCollection.find(query)
         const result = await cursor.toArray();
         res.send(result)
+    });
+    //load data for update 
+    app.get('/allcomments/:id', async(req, res)=>{
+        const id = req.params.id;
+        const query = { _id : ObjectId(id)}
+        const result = await commentsCollection.findOne(query)
+        res.send(result);
     })
 
     //for JWT
@@ -98,9 +105,6 @@ try{
         res.send({token})
     })
 
-
-
-
     // store comments in database
     app.post('/allcomments', async(req, res)=>{
         const comments = req.body;
@@ -108,11 +112,28 @@ try{
         res.send(result);
     });
     // add new service in database
-    app.post('/allservices',verifyJWT, async(req, res)=>{
+    app.post('/allservices', async(req, res)=>{
         const addServices = req.body;
         const result = await serviceCollection.insertOne(addServices)
         res.send(result)
     })
+
+    //update a comment
+    app.put('/allcomments/:id', async(req, res)=>{
+        const id = req.params.id ;
+        const filter = {_id: ObjectId(id)};
+        const updateddata = req.body;
+        const options = { upsert: true };
+        // console.log(req.body.comment)
+        const updateDoc = {
+            $set: {
+                comment : updateddata.comment
+            },
+            };
+        const result = await commentsCollection.updateOne(filter, updateDoc, options)
+            res.send(result)
+    })
+
 
 
     //delete comment
