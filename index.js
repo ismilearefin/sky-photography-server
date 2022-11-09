@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
@@ -13,6 +14,25 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster2.y3njyog.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+
+//JWT token verify function
+function verifyJWT(req,res,next){
+    const authHeader = req.headers.authorization;
+    if(!authHeader){
+       return  res.status(401).send({message : 'unauthorized access'})
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET , function(err, decoded){
+        if(err){
+            res.status(403).send({message: 'unauthorized access'})
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
+
+
 
 
 async function run (){
@@ -55,7 +75,11 @@ try{
         res.send(result)
     })
     //load only user comments
-    app.get('/allcomments/user', async(req, res)=>{
+    app.get('/allcomments/user', verifyJWT, async(req, res)=>{
+        const decoded = req.decoded;
+        if(decoded.email !== req.query.email){
+            res.status(403).send({message: 'unauthorized access'})
+        }
         let query ={};
         if(req.query.email){
             query = {
@@ -67,6 +91,12 @@ try{
         res.send(result)
     })
 
+    //for JWT
+    app.post('/jwt', (req, res)=>{
+        const user = req.body;
+        const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET , {expiresIn: '1h'});
+        res.send({token})
+    })
 
 
 
@@ -78,7 +108,7 @@ try{
         res.send(result);
     });
     // add new service in database
-    app.post('/allservices', async(req, res)=>{
+    app.post('/allservices',verifyJWT, async(req, res)=>{
         const addServices = req.body;
         const result = await serviceCollection.insertOne(addServices)
         res.send(result)
